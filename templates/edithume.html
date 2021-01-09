@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block body %}
+<link href="{{ url_for('static', filename='css/nepali.datepicker.v3.min.css') }}" rel="stylesheet" type="text/css"/>
+
+<style>
+       	
+.std{
+	width: 200px;
+}
+.finaltotaltext{
+	float: right;
+}
+</style>
+<form method="post" action="/edit/{{maindata.billnum}}"  id="form">
+         <div class="table-responsive">
+            <table class="table table-bordered">
+               <tr>
+                  <td colspan="2" align="center">
+                     <h2 style="margin-top:10.5px">Edit Data</h2>
+                  </td>
+               </tr>
+               <tr>
+                  <td colspan="2">
+                     <div class="row">
+                        <div class="col-md-8">
+                           To,<br />
+                  <b>RECEIVER (BILL TO)</b><br />
+                  <input type="text" name="order_receiver_name" id="order_receiver_name" class="form-control input-sm" placeholder="Enter Receiver Name" value="{{maindata.name}}"/>
+                  <input type="number" placeholder="Enter Reciever PAN" id="pan" name="pan" class="form-control input-sm" value="{{maindata.pan}}">
+                  <textarea name="address" id="order_receiver_address" class="form-control" placeholder="Enter Billing Address">{{maindata.address}}</textarea>
+               </div>
+               <div class="col-md-4">
+                  More Details<br />
+                  <input type="text" name="billnum" id="billnum" value="{{maindata.billnum}}" class="form-control input-sm" placeholder="Enter Bill No." />
+                  <input type="number" name="chanum" id="chanum" class="form-control input-sm" placeholder="Enter Challan No." value="{{maindata.chanum}}"/>
+                  <input type="text" name="date" id="date" class="form-control" placeholder="Select Date" readonly value="{{maindata.date}}"/>
+                  <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter Reciever Phone Number" value="{{maindata.phone}}"/>
+               </div>
+                        </div>
+                     </div>
+                     <br />
+                     <table id="invoice-item-table" class="table table-bordered">
+                        <tr>
+                           <th>Sr No.</th>
+                           <th>Type</th>
+                           <th>Size</th>
+                           <th>Unit</th>
+                           <th>Quantity</th>
+                           <th>Price</th>
+                           <th>Amount</th>
+                        </tr>
+                        <tr>
+                          
+                           {% for values in ext %}
+                           	
+                           	<td>{{loop.index}}</td>
+                           		
+                            <td>
+                              <select name="type" id="type{{loop.index}}">
+                                  
+                                 <option value="NP3"{% if values.type=="NP3" %} selected="selected"{% endif %}>NP3</option>
+                                 
+                                 <option value="NP2"{% if values.type=="NP2" %} selected="selected"{% endif %}>NP2</option>
+                              </select>
+                           </td>
+                           <td><input placeholder="Enter Size" type="text" name="size" class="form-control input-sm" value="{{values.size}}" id="size{{loop.index}}"></td>
+                           <td>
+                          
+                              <select name="unit" id="unit{{loop.index}}">
+                                 <option value="Piece"{% if values.unit=="Piece" %} selected="selected"{% endif %}>Piece</option>
+                                 <option value="Running Meter"{% if values.unit=="Running Meter" %} selected="selected"{% endif %}>Running Meter</option>
+                              </select>
+                           </td>
+                           <td><input type="number" class="form-control input-sm" name="quantity" placeholder="Enter Quantity" value="{{values.quantity}}" id="quantity{{loop.index}}"></td>
+                           <td><input type="number" name="price" id="price{{loop.index}}" value="{{values.price}}" placeholder="Enter Price" class="form-control input-sm order_item_actual_amount"></td>
+                           <td><input type="number" name="amount" id="amount{{loop.index}}" placeholder="Amount" class="form-control input-sm order_item_actual_amount" value="{{values.amount}}"></td>
+                        </tr>
+                        {% endfor %}
+                     </table>
+                     
+                  </td>
+               </tr>
+               <tr>
+                  <td class="finaltotaltd">
+							<button type="button" id="calculate" class="btn btn-success">Calculate</button><b class="finaltotaltext">Total</b>
+						</td>
+        				<td class="std">
+							<input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal" value="{{maindata.total}}">
+						</td>
+               </tr>
+               
+               <tr>
+                  <td colspan="2" align="center">
+                     <input type="hidden" name="total_item" id="total_item" value="1" />
+                     <input type="submit" name="create_invoice" id="create_invoice" class="btn btn-info" value="Edit" />
+                  </td>
+               </tr>
+            </table>
+         </div>
+      </form>
+{% endblock body %}
+{% block script %}
+	  <script src="{{ url_for('static', filename='js/nepali.datepicker.v3.min.js') }}" type="text/javascript"></script>
+	  <script type="text/javascript">
+         window.onload = function () {
+             var mainInput = document.getElementById("date");
+             mainInput.nepaliDatePicker();
+         };
+      </script>
+      <script>
+         <script type="text/javascript">
+         window.onload = function () {
+             var mainInput = document.getElementById("date");
+             mainInput.nepaliDatePicker();
+         };
+      </script>
+      <script>
+         $(document).ready(function () {
+         
+             var count = {{length}};
+             
+             $(document).on('click', '#calculate', function () {
+				var final_total = 0;
+				for(j=1; j<=count; j++)
+				{
+					quantity = $('#quantity'+j).val();
+					price = $('#price'+j).val();
+					pricev = parseFloat(price)*parseFloat(quantity);
+					final_total = parseFloat(final_total)+parseFloat(pricev)
+					$('#amount'+j).val(pricev);
+				}
+				$('#finaltotal').val(final_total)
+						
+				});
+        	$('#create_invoice').click(function(){
+          if($.trim($('#order_receiver_name').val()).length == 0)
+          {
+            alert("Please Enter Reciever Name");
+            return false;
+          }
+			 if($.trim($('#pan').val()).length == 0)
+          {
+            alert("Please Enter Reciever PAN");
+            return false;
+          }
+			 if($.trim($('#order_receiver_address').val()).length == 0)
+          {
+            alert("Please Enter Reciever Address");
+            return false;
+          }
+          if($.trim($('#chanum').val()).length == 0)
+          {
+            alert("Please Enter Challan Number");
+            return false;
+          }
+
+          if($.trim($('#date').val()).length == 0)
+          {
+            alert("Please Select Date");
+            return false;
+          }
+		  if($.trim($('#phone').val()).length == 0)
+          {
+            alert("Please Enter Phone Number");
+            return false;
+          }
+
+          for(var no=1; no<=count; no++)
+          {
+            if($.trim($('#size'+no).val()).length == 0)
+            {
+              alert("Please Enter Size");
+              $('#quantity'+no).focus();
+              return false;
+            }
+
+            if($.trim($('#quantity'+no).val()).length == 0)
+            {
+              alert("Please Enter Quantity");
+              $('#quantity'+no).focus();
+              return false;
+            }
+
+            if($.trim($('#price'+no).val()).length == 0)
+            {
+              alert("Please Enter Price");
+              $('#price'+no).focus();
+              return false;
+            }
+		
+          }
+		  if(!confirm("Are you sure you want to Edit this?"))
+		  {
+		  	return false;
+		  }
+          $('#form').submit();
+
+        });
+         
+         });
+      </script>
+{% endblock script %}

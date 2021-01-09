@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block body %}
+<link href="{{ url_for('static', filename='css/nepali.datepicker.v3.min.css') }}" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<style>
+       	
+.std{
+	width: 200px;
+}
+.finaltotaltext{
+	float: right;
+}
+.ui-autocomplete { max-height: 100px; overflow-y: scroll; overflow-x: hidden;}
+</style>
+<form method="post" action="/create" id="form">
+         <div class="table-responsive">
+            <table class="table table-bordered">
+               <tr>
+                  <td colspan="2" align="center">
+                     <h2 style="margin-top:10.5px">Create Data</h2>
+                  </td>
+               </tr>
+               <tr>
+                  <td colspan="2">
+                     <div class="row">
+                        <div class="col-md-8">
+                           To,<br />
+                  <b>RECEIVER (BILL TO)</b><br />
+                  
+                  <input type="text" placeholder="Enter Reciever Name" id="order_receiver_name" name="name" class="form-control input-sm">
+                  <input type="number" placeholder="Enter Reciever PAN" id="pan" name="pan" class="form-control input-sm">
+                  <textarea name="address" id="order_receiver_address" class="form-control" placeholder="Enter Billing Address"></textarea>
+                  <input type="hidden" id="cid" name="cid">
+               </div>
+               <div class="col-md-4">
+                  More Details<br />
+                  <input type="number" name="billnum" id="billnum" class="form-control input-sm" placeholder="Enter Bill No." />
+                  <input type="number" name="chanum" id="chanum" class="form-control input-sm" placeholder="Enter Challan No." />
+                  <input type="text" name="date" id="date" class="form-control" placeholder="Select Date" readonly/>
+                  <input type="number" name="phone" id="phone" class="form-control" placeholder="Enter Reciever Phone Number"/>
+               </div>
+                        </div>
+                     </div>
+                     <br />
+                     <table id="invoice-item-table" class="table table-bordered">
+                        <tr>
+                           <th>Sr No.</th>
+                           <th>Type</th>
+                           <th>Size</th>
+                           <th>Unit</th>
+                           <th>Quantity</th>
+                           <th>Price</th>
+                           <th>Amount</th>
+                        </tr>
+                        <tr>
+                           <td>1</td>
+                           <td>
+                              <select name="type" id="type1">
+                             
+                                 <option value="NP3">NP3</option>
+                                 <option value="NP2">NP2</option>
+                              </select>
+                           </td>
+                           <td><input placeholder="Enter Size" type="text" name="size" class="form-control input-sm" id="size1"></td>
+                           <td>
+                              <select name="unit" id="unit1">
+                                 <option value="Piece">Piece</option>
+                                 <option value="Running Meter">Running Meter</option>
+                              </select>
+                           </td>
+                           <td><input type="number" class="form-control input-sm" name="quantity" placeholder="Enter Quantity" id="quantity1"></td>
+                           <td><input type="number" name="price" id="price1" placeholder="Enter Price" class="form-control input-sm order_item_actual_amount"></td>
+                           <td><input type="number" name="amount" id="amount1" placeholder="Amount" class="form-control input-sm order_item_actual_amount"></td>
+                        </tr>
+                     </table>
+                     <div align="right">
+                        <button type="button" name="add_row" id="add_row" class="btn btn-success btn-xs">+</button>
+                     </div>
+                  </td>
+               </tr>
+               <tr>
+                  <td class="finaltotaltd">
+							<button type="button" id="calculate" class="btn btn-success">Calculate</button><b class="finaltotaltext">Total</b>
+						</td>
+        				<td class="std">
+							<input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal">
+						</td>
+               </tr>
+               
+               <tr>
+                  <td colspan="2" align="center">
+                     <input type="hidden" name="total_item" id="total_item" value="1" />
+                     <input type="submit" name="create_invoice" id="create_invoice" class="btn btn-info" value="Create" />
+                  </td>
+               </tr>
+            </table>
+         </div>
+      </form>
+{% endblock body %}
+{% block script %}
+	  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	  <script src="{{ url_for('static', filename='js/nepali.datepicker.v3.min.js') }}" type="text/javascript"></script>
+
+      
+      <script type="text/javascript">
+         
+         	
+         window.onload = function () {
+             var mainInput = document.getElementById("date");
+             mainInput.nepaliDatePicker();
+         };
+         
+      </script>
+      <script>
+         $(document).ready(function () {
+         	var a=[];
+ 			function loadCountries(){
+  				$.getJSON('/client', function(data, status, xhr){
+   					for (var i = 0; i < data.length; i++ ) {
+    					a.push(data[i].name);
+   					}
+ 				});
+ 			};
+ 			loadCountries();
+				
+			
+
+ 			$('#order_receiver_name').autocomplete({
+  				source: a,
+  				select: function( event, ui ) {
+  					
+  					var naam = ui.item.label;
+  					filldetail(naam);
+  				}
+  				
+ 			});
+ 			function filldetail(naam){
+ 				$.ajax({
+					data : {"name":naam},
+					method : 'POST',
+					url : '/client',
+					success : function(resp){
+						$("#order_receiver_address").val(resp.address);
+						$("#pan").val(resp.pan);
+						$("#cid").val(resp.cid)
+						$("#phone").val(resp.phone)
+						
+					}
+				});
+ 			}
+ 			
+ 			
+             var count = 1;
+             $(document).on('click', '#add_row', function () {
+         
+                 count++;
+         
+                 var html_code = '';
+                 html_code += '<tr id="row_id_' + count + '">';
+                 html_code += '<td><span id="sr_no">' + count + '</span></td>';
+         
+                 html_code += '<td><select name="type" id="type ' + count + '"><option value="NP3">NP3</option><option value="NP2">NP2</option></select></td>';
+         
+                 html_code += '<td><input type="text" placeholder="Enter Size" name="size" id="size' + count + '" data-srno="' + count + '" class="form-control input-sm number_only order_item_quantity" /></td>';
+                 html_code += '<td><select name="unit" id="unit ' + count + '"><option value="Piece">Piece</option><option value="Running Meter">Running Meter</option></select>';
+                 html_code += '<td><input type="number" name="quantity" placeholder="Enter Quantity" id="quantity' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
+                 html_code += '<td><input type="number" placeholder="Enter Price" name="price" id="price' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
+         
+                 html_code += '<td><input type="number" name="amount" placeholder="Amount" id="amount' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
+         
+         
+                 html_code += '<td><button type="button" name="remove_row" id="' + count + '" class="btn btn-danger btn-xs remove_row">X</button></td>';
+                 html_code += '</tr>';
+                 $('#invoice-item-table').append(html_code);
+             });
+             $(document).on('click', '.remove_row', function () {
+                 var row_id = $(this).attr("id");
+                 $('#row_id_' + row_id).remove();
+                 count--;
+                 $('#total_item').val(count);
+             });
+             $(document).on('click', '#calculate', function () {
+				var final_total = 0;
+				for(j=1; j<=count; j++)
+				{
+					quantity = $('#quantity'+j).val();
+					price = $('#price'+j).val();
+					pricev = parseFloat(price)*parseFloat(quantity);
+					final_total = parseFloat(final_total)+parseFloat(pricev)
+					$('#amount'+j).val(pricev);
+				}
+				$('#finaltotal').val(final_total)
+						
+				});
+        	$('#create_invoice').click(function(){
+          if($.trim($('#order_receiver_name').val()).length == 0)
+          {
+            alert("Please Enter Reciever Name");
+            return false;
+          }
+			 if($.trim($('#order_receiver_address').val()).length == 0)
+          {
+            alert("Please Enter Reciever Address");
+            return false;
+          }
+          if($.trim($('#chanum').val()).length == 0)
+          {
+            alert("Please Enter Challan Number");
+            return false;
+          }
+			
+          if($.trim($('#date').val()).length == 0)
+          {
+            alert("Please Select Date");
+            return false;
+          }
+			 
+		  if($.trim($('#phone').val()).length == 0)
+          {
+            alert("Please Enter Phone Number");
+            return false;
+          }
+          for(var no=1; no<=count; no++)
+          {
+            if($.trim($('#size'+no).val()).length == 0)
+            {
+              alert("Please Enter Size");
+              $('#quantity'+no).focus();
+              return false;
+            }
+
+            if($.trim($('#quantity'+no).val()).length == 0)
+            {
+              alert("Please Enter Quantity");
+              $('#quantity'+no).focus();
+              return false;
+            }
+
+            if($.trim($('#price'+no).val()).length == 0)
+            {
+              alert("Please Enter Price");
+              $('#price'+no).focus();
+              return false;
+            }
+
+          }
+
+          $('#form').submit();
+
+        });
+        
+     });
+    </script>
+    
+{% endblock script %}

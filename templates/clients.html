@@ -1,0 +1,221 @@
+
+
+{% extends 'base.html' %}
+{% block style %}
+<style>
+	.exportbtn{
+		border: 1px solid gray;
+		background-color: #F3F6FA;
+		color: gray;
+		padding: 8px 20px;
+		font-size: 16px;
+		cursor: pointer;
+		border-radius: 5px;
+		}
+</style>
+{% endblock style %}
+{% block body %}
+
+<div class="container mt-5" >
+   <button type="button" class="btn btn-primary mb-5" data-toggle="modal" data-target="#staticBackdrop">Add Client</button>
+               <table class="mytable table-bordered table-striped" id="table">
+                  <thead>
+                     <tr>
+                       
+                        <th scope="col">Name</th>
+                        <th scope="col">Cid Number</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Phone</th>
+                        <th width="10%" scope="col">Menu</th>
+                        
+                        
+                     </tr>
+                  </thead>
+                  <tbody>
+                  	{% for list in lists %}
+                     <tr>
+                        
+                        <td>{{list.name}}</td>
+                        <td>U{{list.cid}}</td>
+                        <td>{{list.address}}</td>
+                        <td>{{list.phone}}</td>
+                        <td>
+		                    <div class="dropdown">
+							  <button type="button" class="btn btn-danger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Menu</button>
+							  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							  	<a class="dropdown-item" href="#"><i class="fa fa-eye"> View</i></a>
+							  	<a class="dropdown-item client_edit" id="{{list.cid}}" href="#"><i class="fa fa-pencil-square-o"> Edit</i></a>
+							  	<a class="dropdown-item delete" id="{{list.cid}}" href="#"><i class="fa fa-trash-o"> Delete</i></a>
+							  </div>
+							</div>
+                        </td>
+                        
+                     </tr>
+                    {% endfor %}
+                     
+                  </tbody>
+               </table>
+ </div>
+ 
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel" style="text-align:center;">Add Client</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/addclient" method="post" id="form_client">
+  <div class="form-group">
+    <label for="pan">PAN</label>
+    <input type="text" class="form-control" id="pan" name="pan">
+    
+  </div>
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" id="name" name="name">
+  </div>
+	<div class="form-group">
+    <label for="address">Address</label>
+    <input type="text" class="form-control" id="address" name="address">
+  </div>
+	<div class="form-group">
+    <label for="phone">Phone</label>
+    <input type="text" class="form-control" id="phone" name="phone">
+  </div>
+  
+</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="submit_client btn btn-primary">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--This is Edit Modal-->
+<div class="modal fade" id="editmodal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel" style="text-align:center;">Edit Client</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/update" method="post" id="form_edit_client">
+  <div class="form-group">
+    <label for="pan">PAN</label>
+    <input type="text" class="form-control" id="editpan" name="editpan">
+    
+  </div>
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" id="editname" name="editname">
+  </div>
+	<div class="form-group">
+    <label for="address">Address</label>
+    <input type="text" class="form-control" id="editaddress" name="editaddress">
+  </div>
+	<div class="form-group">
+    <label for="phone">Phone</label>
+    <input type="text" class="form-control" id="editphone" name="editphone">
+  </div>
+  <input type="hidden" id="editsno" name="editsno">
+</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="edit_client btn btn-primary">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock body %}
+{% block script %}
+	
+	<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+	<script>
+		$(document).ready( function () {
+			$(document).on('click', '.client_edit', function(){
+				var sno = $(this).attr("id")
+				$.ajax({
+					data : {"sno":sno},
+					method : 'GET',
+					url : '/update',
+					success : function(resp){
+						$("#editname").val(resp.name);
+						$("#editpan").val(resp.pan);
+						$("#editaddress").val(resp.address);
+						$("#editphone").val(resp.phone);
+						$("#editsno").val(sno);
+						$("#editmodal").modal("toggle");
+						
+					}
+				});
+			});
+
+    		$(document).on('click', '.submit_client', function(){
+    			if($.trim($('#name').val()).length == 0)
+          		{
+            		alert("Please Enter Client Name");
+            		return false;
+          		}
+				
+          		if($.trim($('#address').val()).length == 0)
+          		{
+            		alert("Please Enter Client's Address");
+            		return false;
+          		}
+          		if($.trim($('#phone').val()).length == 0)
+          		{
+            		alert("Please Enter Client's Phone Number");
+            		return false;
+          		}
+    			$("#form_client").submit();
+    			
+    		});
+    		
+    		$(document).on('click', '.edit_client', function(){
+    			if($.trim($('#editname').val()).length == 0)
+          		{
+            		alert("Please Enter Client Name");
+            		return false;
+          		}
+				
+          		if($.trim($('#editaddress').val()).length == 0)
+          		{
+            		alert("Please Enter Client's Address");
+            		return false;
+          		}
+          		if($.trim($('#editphone').val()).length == 0)
+          		{
+            		alert("Please Enter Client's Phone Number");
+            		return false;
+          		}
+    			$("#form_edit_client").submit();
+    		});
+    		$(document).on('click', '.delete', function(){
+      			var id = $(this).attr("id");
+      			if(confirm("Are you sure you want to remove this?"))
+      			{
+        			window.location.href="client_delete/"+id;
+      			}
+      			else
+      			{
+        			return false;
+      			}
+    		});
+			$('#table').DataTable();
+    		
+		});
+	</script>
+	
+{% endblock script %}
+

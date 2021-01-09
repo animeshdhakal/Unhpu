@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block style %}
+<style>
+	.exportbtn{
+		border: 1px solid gray;
+		background-color: #F3F6FA;
+		color: gray;
+		padding: 8px 20px;
+		font-size: 16px;
+		cursor: pointer;
+		border-radius: 5px;
+		}
+</style>
+{% endblock style %}
+{% block body %}
+
+<div class="container mt-5" >
+   <div class="dropdown float-left">
+		<button type="button" class="exportbtn mb-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Export</button>
+		<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+			<a class="dropdown-item" href="#" id="exportsheet">Export Sheet</a>
+			<a class="dropdown-item" href="#" id="exportall">Export All Data</a>
+			
+		</div>
+	</div>
+   <button class="btn btn-primary float-right mb-5 createnew">Create New</button>
+               <table class="table table-bordered table-striped" id="table">
+                  <thead>
+                     <tr>
+                        <th width="5%" scope="col">Challan Number</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">PAN Number</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Phone</th>
+                        <th width="10%" scope="col">Menu</th>
+                        
+                        
+                     </tr>
+                  </thead>
+                  <tbody>
+                  	{% for list in lists %}
+                     <tr>
+                        <th scope="row">{{list.chanum}}</th>
+                        <td>{{list.name}}</td>
+                        <td>{{list.pan}}</td>
+                        <td>{{list.address}}</td>
+                    	<td>{{list.date}}</td>
+                        <td>{{list.phone}}</td>
+                        <td>
+		                    <div class="dropdown">
+							  <button type="button" class="btn btn-danger" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Menu</button>
+							  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							  	<a class="dropdown-item view" id="{{list.chanum}}" href="#"><i class="fa fa-eye"> View</i></a>
+							  	<a class="dropdown-item edit" id="{{list.chanum}}" href="#"><i class="fa fa-pencil-square-o"> Edit</i></a>
+							  	<a class="dropdown-item delete" id="{{list.chanum}}" href="#"><i class="fa fa-trash-o"> Delete</i></a>
+							  </div>
+							</div>
+                        </td>
+                        
+                     </tr>
+                    {% endfor %}
+                     
+                  </tbody>
+               </table>
+ </div>
+ 
+{% endblock body %}
+{% block script %}
+	
+	<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+	<script>
+		$(document).ready( function () {
+			$(document).on('click', '.edit', function(){
+      			var id = $(this).attr("id");
+      			window.location.href="edit/"+id;
+    		});
+    		$(document).on('click', '.view', function(){
+      			var id = $(this).attr("id");
+      			window.location.href="view/"+id;
+    		});
+			$(document).on('click', '.delete', function(){
+      			var id = $(this).attr("id");
+      			if(confirm("Are you sure you want to remove this?"))
+      			{
+        			window.location.href="delete/"+id;
+      			}
+      			else
+      			{
+        			return false;
+      			}
+    		});
+    		$('#table').DataTable({
+    			"order": [[ 0, "desc" ]],
+    			'columnDefs': [ {
+        			'targets': [1,2,3,4,5,6], // column index (start from 0)
+        			'orderable': false, // set orderable false for selected columns
+     			}]
+    		
+    		});
+    		
+    		$(document).on('click', '.createnew', function(){
+    			window.location.href="create";
+    		});
+    		$(document).on('click', '#exportall', function(){
+      			
+      			window.location.href="export/all"
+    		});
+    		$(document).on('click', '#exportsheet', function(){
+      			
+      			window.location.href="export"
+    		});
+		});
+		
+	</script>
+	
+{% endblock script %}
+
