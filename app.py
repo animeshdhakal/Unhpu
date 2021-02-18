@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, redirect, flash, send_file, jsonify
+from flask import Flask, render_template, request, redirect, flash, send_file, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 import xlsxwriter
 from io import BytesIO
 
 
 #/private/var/mobile/Containers/Shared/AppGroup/F72DB166-711A-41BF-866B-8C5F7F3CF6BE/File Provider Storage/data.xlsx
+
+adminuser = "admin"
+adminpass = "admin"
 
 app = Flask(__name__)
 app.secret_key = "Secret Key"
@@ -52,6 +55,11 @@ class Clients(db.Model):
 	def as_dict(self):
 		return {'name':self.name}
 	
+def sesscheck():
+	if 'user' in session and session["user"] == adminuser:
+		return True
+	else:
+		return False
 
 def index_num(naam, query):
 	emplist=[]
@@ -65,15 +73,37 @@ def index_num(naam, query):
 def gettodaydate():
 	from nepali_date import NepaliDate
 	a = str(NepaliDate.today())
-	return a[3:7], a[8:10], a[11:13]	
+	return a[3:7], a[8:10], a[11:13]
+
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+	if request.method == "POST":
+		user = request.form.get("username")
+		password = request.form.get("password")
+		if user == adminuser and password == adminpass:
+			session["user"] = user
+			return redirect("/")
+	if 'user' in session and session["user"] == adminuser:
+		return redirect("/")
+	return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+	session.pop('user')
+	return redirect("/login")
 
 @app.route("/")
 def humepipelist():
+	if not sesscheck():
+		return redirect("/login")		
 	lists = Info.query.filter_by().all()
 	return render_template("humepipelist.html", lists=lists)
 
 @app.route("/addclient", methods=["POST", "GET"])
 def addclient():
+	if not sesscheck():
+		return redirect("/login")
 	if request.method == "POST":
 		pan = request.form.get("pan")
 		name = request.form.get("name")
@@ -89,11 +119,15 @@ def addclient():
 	
 @app.route("/clients")
 def clients():
+	if not sesscheck():
+		return redirect("/login")
 	lists = Clients.query.filter_by().all()
 	return render_template("clients.html", lists=lists)
 	
 @app.route("/update", methods=["POST", "GET"])
 def update():
+	if not sesscheck():
+		return redirect("/login")
 	if request.method == "GET":
 		cid = request.args.get("sno")
 		data = Clients.query.filter_by(cid=cid).first()
@@ -121,7 +155,8 @@ def update():
 		
 @app.route("/create", methods=["POST", "GET"])
 def create():
-	
+	if not sesscheck():
+		return redirect("/login")
 	if request.method == "POST":
 		chanum = request.form.get("chanum")
 		exist = Info.query.filter_by(chanum=chanum).all();
@@ -155,6 +190,8 @@ def create():
 
 @app.route("/delete/<string:chnum>")
 def delete(chnum):
+	if not sesscheck():
+		return redirect("/login")
 	exist = Info.query.filter_by(chanum=chnum).first()
 	if(exist):
 		aexist = Extra.query.filter_by(chanum=chnum).delete()
@@ -169,6 +206,8 @@ def delete(chnum):
 		
 @app.route("/client_delete/<string:chnum>")
 def client_delete(chnum):
+	if not sesscheck():
+		return redirect("/login")
 	exist = Clients.query.filter_by(cid=chnum).first()
 	if(exist):
 		aexist = Extra.query.filter_by(chanum=chnum).delete()
@@ -186,6 +225,8 @@ def client_delete(chnum):
 		
 @app.route("/view/<string:chnum>")
 def view(chnum):
+	if not sesscheck():
+		return redirect("/login")
 	maindata = Info.query.filter_by(chanum=chnum).first()
 	ext = Extra.query.filter_by(chanum=chnum).all()
 	length = len(ext)
@@ -193,6 +234,8 @@ def view(chnum):
 	
 @app.route("/edit/<string:chanum>", methods=["POST", "GET"])
 def edit(chanum):
+	if not sesscheck():
+		return redirect("/login")
 	maindata = Info.query.filter_by(chanum=chanum).first()
 	ext = Extra.query.filter_by(chanum=chanum).all()
 	length = len(ext)
@@ -233,6 +276,8 @@ def edit(chanum):
 	
 @app.route("/export")
 def export():
+	if not sesscheck():
+		return redirect("/login")
 	output = BytesIO()
 	maindata = Info.query.filter_by().all()
 	nam = index_num("name",maindata)
@@ -278,6 +323,8 @@ def export():
 	
 @app.route("/export/<chnum>")
 def exportchnum(chnum):
+	if not sesscheck():
+		return redirect("/login")
 	maindata = Info.query.filter_by(chanum=chnum).first()
 	if(maindata):
 		output = BytesIO()
@@ -464,4 +511,4 @@ def countrydic():
 		return jsonify({"cid":data.cid, "address":data.address, "phone":data.phone, "pan":data.pan})
 
 if __name__ == "__main__":
-	app.run(use_reloader=False,debug=True)
+	app.run(debug=True)
