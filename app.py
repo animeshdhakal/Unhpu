@@ -81,9 +81,13 @@ def login():
 	if request.method == "POST":
 		user = request.form.get("username")
 		password = request.form.get("password")
+		print(user, password)
 		if user == adminuser and password == adminpass:
+			print("Authenticated")
 			session["user"] = user
-			return redirect("/")
+			return jsonify({"failed":False, "error":False});
+		else:
+			return jsonify({"failed":True, "error":"Wrong Username or Pass"});
 	if 'user' in session and session["user"] == adminuser:
 		return redirect("/")
 	return render_template("login.html")
@@ -410,6 +414,7 @@ def exportchnum(chnum):
 		
 @app.route("/export/all")
 def exportall():
+	
 	output = BytesIO()
 	workbook = xlsxwriter.Workbook(output)
 	worksheet = workbook.add_worksheet()
