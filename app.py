@@ -11,9 +11,9 @@ adminpass = "admin"
 
 app = Flask(__name__)
 app.secret_key = "Secret Key"
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data'
 
+humePipeSize = ["150 MM", "200 MM", "250 MM", "300 MM", "400 MM", "450 MM", "500 MM", "600 MM", "700 MM", "750 MM", "800 MM", "900 MM", "1000 MM", "1200 MM"]
 
 db = SQLAlchemy(app)
 
@@ -190,7 +190,7 @@ def create():
 			return redirect("/")
 		else:
 			return "Bill Already Exists"
-	return render_template("createnewhume.html")
+	return render_template("createnewhume.html", humePipeSize=humePipeSize)
 
 @app.route("/delete/<string:chnum>")
 def delete(chnum):

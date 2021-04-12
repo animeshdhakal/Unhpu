@@ -62,7 +62,13 @@
                                  <option value="NP2">NP2</option>
                               </select>
                            </td>
-                           <td><input placeholder="Enter Size" type="text" name="size" class="form-control input-sm" id="size1"></td>
+                           <td>
+                              <select name="size" id="size1">
+                                 {% for i in humePipeSize %}
+                                    <option value="size">{{i}}</option>
+                                {% endfor %}
+                              </select>
+                           </td>
                            <td>
                               <select name="unit" id="unit1">
                                  <option value="Piece">Piece</option>
@@ -161,8 +167,10 @@
                  html_code += '<td><span id="sr_no">' + count + '</span></td>';
          
                  html_code += '<td><select name="type" id="type ' + count + '"><option value="NP3">NP3</option><option value="NP2">NP2</option></select></td>';
-         
-                 html_code += '<td><input type="text" placeholder="Enter Size" name="size" id="size' + count + '" data-srno="' + count + '" class="form-control input-sm number_only order_item_quantity" /></td>';
+                 html_code += '<td><select name="size" id="size' + count + '"';
+                 {% for i in humePipeSize %}
+                  html_code += '<option value="size">{{i}}</option>';
+                 {% endfor %}
                  html_code += '<td><select name="unit" id="unit ' + count + '"><option value="Piece">Piece</option><option value="Running Meter">Running Meter</option></select>';
                  html_code += '<td><input type="number" name="quantity" placeholder="Enter Quantity" id="quantity' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
                  html_code += '<td><input type="number" placeholder="Enter Price" name="price" id="price' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
