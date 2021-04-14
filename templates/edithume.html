@@ -196,12 +196,6 @@
       }
 
       for (var no = 1; no <= count; no++) {
-         if ($.trim($('#size' + no).val()).length == 0) {
-            alert("Please Enter Size");
-            $('#quantity' + no).focus();
-            return false;
-         }
-
          if ($.trim($('#quantity' + no).val()).length == 0) {
             alert("Please Enter Quantity");
             $('#quantity' + no).focus();
