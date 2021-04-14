@@ -5,20 +5,21 @@
    .std {
       width: 200px;
    }
-   html { overflow-y: hidden; }
 
    
    
 </style>
-<button class="btn btn-primary float-right mt-3 mr-2 print">Print</button>
-<button class="btn btn-primary float-left mt-3 mr-2" id="{{maindata.chanum}}" onclick="edit(this)">Edit</button>
+<button class="btn btn-primary float-left mt-3 ml-4" id="{{maindata.chanum}}" onclick="edit(this)">Edit</button>
+<button class="btn btn-primary float-right mt-3 mr-5 print">Print</button>
+
 <div id="printdiv">
-   <div class="table-responsive" style="overflow: hidden;">
+   <div class="table-responsive" style="overflow-x: hidden;">
       <table class="table table-bordered">
          <tr>
             <td colspan="2" align="center">
                <h3 style="margin-top:10.5px">Unique Nepal Hume Pipe Udhyog</h2>
                   <h5>Bharatpur-14, Chitwan</h2>
+                  <h6>PAN: 608737942</h4>
             </td>
          </tr>
          <tr>
@@ -42,7 +43,7 @@
                   </div>
                </div>
    </div>
-   <br />
+   <br/>
    <table id="invoice-item-table" class="table table-bordered">
       <tr>
          <th>Sr No.</th>
@@ -76,7 +77,7 @@
    </tr>
    
 
-   <table class="tbl" style="margin-left: auto; border-collapse:separate; border-spacing:1em;">
+   <table class="tbl" style="margin-left: auto; border: none;">
       <tr>
          <td class="totaltext" align="right">
             <b class="finaltotaltext">Sub Total:</b>
@@ -113,7 +114,7 @@
    $(document).on('click', '.print', function () {
       var restorepage = document.documentElement.innerHTML;
       var printcontent = document.getElementById('printdiv').innerHTML;
-      document.body.innerHTML = '<style>.tbl{margin-right: 4em} html{overflow: hidden;}</style>' + printcontent;
+      document.body.innerHTML = '<style>.tbl{margin-right: 4em}</style>' + printcontent;
       window.print();
       location.reload();
 
