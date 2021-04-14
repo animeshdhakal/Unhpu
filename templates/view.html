@@ -76,9 +76,9 @@
 
    </td>
    </tr>
-   </table>
+   
 
-   <table class="tbl table-bordered" style="margin-left: auto; border-collapse:separate; border-spacing:1em;">
+   <table class="tbl" style="margin-left: auto; border-collapse:separate; border-spacing:1em;">
       <tr>
          <td class="totaltext" align="right">
             <b class="finaltotaltext">Sub Total:</b>
@@ -104,6 +104,7 @@
          </td>
       </tr>
    </table>
+</table>
 
 </div>
 </div>
@@ -114,7 +115,7 @@
    $(document).on('click', '.print', function () {
       var restorepage = document.documentElement.innerHTML;
       var printcontent = document.getElementById('printdiv').innerHTML;
-      document.body.innerHTML = '<style>.tbl{margin-right: 8em;} html{overflow: hidden;}</style>' + printcontent;
+      document.body.innerHTML = '<style>.tbl{margin-right: 4em} html{overflow: hidden;}</style>' + printcontent;
       window.print();
       location.reload();
 
