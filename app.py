@@ -4,16 +4,16 @@ import xlsxwriter
 from io import BytesIO
 
 
-#/private/var/mobile/Containers/Shared/AppGroup/F72DB166-711A-41BF-866B-8C5F7F3CF6BE/File Provider Storage/data.xlsx
-
 adminuser = "admin"
 adminpass = "admin"
 
 app = Flask(__name__)
-app.secret_key = "Secret Key"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data'
 
-humePipeSize = ["150 MM", "200 MM", "250 MM", "300 MM", "400 MM", "450 MM", "500 MM", "600 MM", "700 MM", "750 MM", "800 MM", "900 MM", "1000 MM", "1200 MM"]
+app.secret_key = "uniquenepalhumepipeudhyogchitwanbharatpur"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False;
+
+pipeSizeList = ["150 MM", "200 MM", "250 MM", "300 MM", "400 MM", "450 MM", "500 MM", "600 MM", "700 MM", "750 MM", "800 MM", "900 MM", "1000 MM", "1200 MM"]
 
 db = SQLAlchemy(app)
 
@@ -60,15 +60,6 @@ def sesscheck():
 		return True
 	else:
 		return False
-
-def index_num(naam, query):
-	emplist=[]
-	d = f"data.{naam}"
-	for data in query:
-		emplist.append(eval(d))
-	maxvalue = max(emplist, key=len)
-	#max_index = emplist.index(maxvalue)
-	return maxvalue
 	
 def gettodaydate():
 	from nepali_date import NepaliDate
@@ -83,7 +74,6 @@ def login():
 		password = request.form.get("password")
 		print(user, password)
 		if user == adminuser and password == adminpass:
-			print("Authenticated")
 			session["user"] = user
 			return jsonify({"failed":False, "error":False});
 		else:
@@ -165,6 +155,7 @@ def create():
 		chanum = request.form.get("chanum")
 		exist = Info.query.filter_by(chanum=chanum).all();
 		if(not exist):
+			print(request.form.get("size"))
 			billnum = request.form.get("billnum")
 			name = request.form.get("name")
 			pan = request.form.get("pan")
@@ -190,7 +181,7 @@ def create():
 			return redirect("/")
 		else:
 			return "Bill Already Exists"
-	return render_template("createnewhume.html", humePipeSize=humePipeSize)
+	return render_template("createnewhume.html", humePipeSize=pipeSizeList)
 
 @app.route("/delete/<string:chnum>")
 def delete(chnum):
@@ -262,247 +253,21 @@ def edit(chanum):
 		price = request.form.getlist("price")
 		amount = request.form.getlist("amount")
 		for t,s,u,q,p,a,ex in zip(type,size,unit,quantity,price,amount,ext):
-				ex.chanum = chanum
-				ex.billnum = bill
-				ex.type = t
-				ex.size = s
-				ex.unit = u
-				ex.quantity = q
-				ex.price = p
-				ex.amount = a
-				db.session.commit()
+			ex.chanum = chanum
+			ex.billnum = bill
+			ex.type = t
+			ex.size = s
+			ex.unit = u
+			ex.quantity = q
+			ex.price = p
+			ex.amount = a
+			db.session.commit()
 		flash('Changes Applied Sucessfully','success')
 		return redirect("/")
 		
 			
-	return render_template("edithume.html", ext=ext, maindata=maindata, length=length)
+	return render_template("edithume.html", ext=ext, maindata=maindata, pipeList=pipeSizeList, length=length)
 	
-	
-@app.route("/export")
-def export():
-	if not sesscheck():
-		return redirect("/login")
-	output = BytesIO()
-	maindata = Info.query.filter_by().all()
-	nam = index_num("name",maindata)
-	add = index_num("address", maindata)
-	
-	workbook = xlsxwriter.Workbook(output)
-	
-	worksheet = workbook.add_worksheet()
-	work = workbook.add_format()
-	work.set_border(10)
-		
-	list =["Challan No.", "Bill No.", "Name", "pan", "address", "total", "date"]
-	bord = workbook.add_format({'border': 2})
-	bld = workbook.add_format({'bold': True})
-	
-	worksheet.set_column('{0}:{0}'.format(chr(0 + ord('E'))), len(str(add)) + 2)
-	worksheet.set_column('{0}:{0}'.format(chr(0 + ord('C'))), len(str(nam)) + 2)
-	
-	
-	row = 0
-	col = 0
-	for li in list:
-		worksheet.write(row, col, li, workbook.add_format({'border': 2, 'bold': True}))
-		col += 1
-	ro = 1
-	c = 0
-	for data in maindata:
-		worksheet.write(ro, c, data.chanum, bord)
-		worksheet.write(ro, c+1, data.billnum, bord)
-		worksheet.write(ro, c+2, data.name, bord)
-		worksheet.write(ro, c+3, data.pan, bord)
-		worksheet.write(ro, c+4, data.address, bord)
-		worksheet.write(ro, c+5, data.total, bord)
-		worksheet.write(ro, c+6, data.date, bord)
-		ro+=1
-		
-	
-	
-	
-	workbook.close()
-	output.seek(0)
-	return send_file(output, attachment_filename="testing.xlsx", as_attachment=True)
-	
-@app.route("/export/<chnum>")
-def exportchnum(chnum):
-	if not sesscheck():
-		return redirect("/login")
-	maindata = Info.query.filter_by(chanum=chnum).first()
-	if(maindata):
-		output = BytesIO()
-		workbook = xlsxwriter.Workbook(output)
-		worksheet = workbook.add_worksheet()
-		align_center = workbook.add_format({'align': 'center', 'border': 1})
-		worksheet.merge_range('A1:F1', 'Unique Nepal Hume Pipe Udhyog', workbook.add_format({'align': 'center', 'bold': True, 'border': 1}))
-		worksheet.merge_range('A2:F2', 'Sundar Chowk, Bharatpur-14, Chitwan', workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.merge_range('A3:F3', f"Name : {maindata.name}", workbook.add_format({'border': 1}))
-		worksheet.merge_range('A4:F4', f"Address : {maindata.address}", workbook.add_format({'border': 1}))
-		worksheet.merge_range('A5:F5', f"Challan No. : {maindata.chanum}", workbook.add_format({'border': 1}))
-		worksheet.merge_range('A6:F6', f"Phone No. : {maindata.phone}", workbook.add_format({'border': 1}))
-		lists = Extra.query.filter_by(chanum=chnum).all()
-		
-		
-		
-		worksheet.write(6, 0, "S.N.", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('A:A', 5)
-		
-		
-		worksheet.write(6, 1, "Description", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('B:B', 20)
-		
-		worksheet.write(6, 2, "Unit", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('C:C', 5)
-		
-		worksheet.write(6, 3, "Quantity", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('D:D', 10)
-		
-		worksheet.write(6, 4, "Rate", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('E:E', 10)
-		
-		worksheet.write(6, 5, "Amount", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('F:F', 10)
-		
-		i = 1
-		raw = 7
-		col = 0
-		for list in lists:
-			worksheet.write(raw, col, i, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+1, f"{list.size} {list.type}", workbook.add_format({'align': 'center', 'border': 1}))
-			if(list.unit=="Running Meter"):
-				u = "RM"
-			else:
-				u = "PCS"
-			worksheet.write(raw, col+2, u, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+3, list.quantity, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+4, list.price, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+5, list.amount, workbook.add_format({'align': 'center', 'border': 1}))
-			raw+=1
-			i+=1
-		print(i)
-			
-		worksheet.merge_range("C"+str(raw+3)+":"+"E"+str(raw+3), "Sub Total", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+3), maindata.total, workbook.add_format({'align': 'center', 'border': 1}))
-		f = 13 / 100 * maindata.total
-		
-		
-		
-		worksheet.merge_range("C"+str(raw+4)+":"+"E"+str(raw+4), "13% VAT", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+4), f, workbook.add_format({'align': 'center', 'border': 1}))
-		
-		
-		worksheet.merge_range("C"+str(raw+5)+":"+"E"+str(raw+5), "Grand Total", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+5), maindata.total+f, workbook.add_format({'align': 'center', 'border': 1}))
-		e = raw
-		for d in range(1, 6):
-			worksheet.write("B"+str(e+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("A"+str(e+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			e+=1
-		ew = raw
-		for wew in range(1,3):
-			worksheet.write("C"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("D"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("E"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("F"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			ew+=1
-		
-		workbook.close()
-		output.seek(0)
-		return send_file(output, attachment_filename="testing.xlsx", as_attachment=True)
-		
-		
-@app.route("/export/all")
-def exportall():
-	
-	output = BytesIO()
-	workbook = xlsxwriter.Workbook(output)
-	worksheet = workbook.add_worksheet()
-	maindata = Info.query.filter_by().order_by(Info.chanum.desc()).all()
-	ind = 1
-	for dta in maindata:
-		
-		
-		align_center = workbook.add_format({'align': 'center', 'border': 1})
-		#A1:F1
-		worksheet.merge_range(f"A{ind}:F{ind}", 'Unique Nepal Hume Pipe Udhyog', workbook.add_format({'align': 'center', 'bold': True, 'border': 1, 'top': 1}))
-		worksheet.merge_range(f"A{ind+1}:F{ind+1}", 'Sundar Chowk, Bharatpur-14, Chitwan', workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.merge_range(f"A{ind+2}:F{ind+2}", f"Name : {dta.name}", workbook.add_format({'border': 1}))
-		worksheet.merge_range(f"A{ind+3}:F{ind+3}", f"Address : {dta.address}", workbook.add_format({'border': 1}))
-		worksheet.merge_range(f"A{ind+4}:F{ind+4}", f"Challan No. : {dta.chanum}", workbook.add_format({'border': 1}))
-		worksheet.merge_range(f"A{ind+5}:F{ind+5}", f"Phone No. : {dta.phone}", workbook.add_format({'border': 1}))
-		lists = Extra.query.filter_by(chanum=dta.chanum).all()
-		
-		
-		
-		worksheet.write(5+ind, 0, "S.N.", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('A:A', 5)
-		
-		
-		worksheet.write(5+ind, 1, "Description", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('B:B', 20)
-		
-		worksheet.write(5+ind, 2, "Unit", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('C:C', 5)
-		
-		worksheet.write(5+ind, 3, "Quantity", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('D:D', 10)
-		
-		worksheet.write(5+ind, 4, "Rate", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('E:E', 10)
-		
-		worksheet.write(5+ind, 5, "Amount", workbook.add_format({'align': 'center', 'border': 1}))
-		worksheet.set_column('F:F', 10)
-		
-		i = 1
-		raw = 6+ind
-		col = 0
-		for list in lists:
-			worksheet.write(raw, col, i, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+1, f"{list.size} {list.type}", workbook.add_format({'align': 'center', 'border': 1}))
-			if(list.unit=="Running Meter"):
-				u = "RM"
-			else:
-				u = "PCS"
-			worksheet.write(raw, col+2, u, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+3, list.quantity, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+4, list.price, workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write(raw, col+5, list.amount, workbook.add_format({'align': 'center', 'border': 1}))
-			raw+=1
-			i+=1
-		
-			
-		worksheet.merge_range("C"+str(raw+3)+":"+"E"+str(raw+3), "Sub Total", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+3), dta.total, workbook.add_format({'align': 'center', 'border': 1}))
-		f = 13 / 100 * dta.total
-		
-		
-		
-		worksheet.merge_range("C"+str(raw+4)+":"+"E"+str(raw+4), "13% VAT", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+4), f, workbook.add_format({'align': 'center', 'border': 1}))
-		
-		
-		worksheet.merge_range("C"+str(raw+5)+":"+"E"+str(raw+5), "Grand Total", workbook.add_format({'border': 1}))
-		worksheet.write("F"+str(raw+5), dta.total+f, workbook.add_format({'align': 'center', 'border': 1}))
-		e = raw
-		for d in range(1, 6):
-			worksheet.write("B"+str(e+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("A"+str(e+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			e+=1
-		ew = raw
-		for wew in range(1,3):
-			worksheet.write("C"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("D"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("E"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			worksheet.write("F"+str(ew+1), "", workbook.add_format({'align': 'center', 'border': 1}))
-			ew+=1
-		
-		ind+=15+i-1
-	workbook.close()
-	output.seek(0)
-	return send_file(output, attachment_filename="test.xlsx", as_attachment=True)
-	
-
 
 @app.route('/client', methods=["POST", "GET"])
 def countrydic():

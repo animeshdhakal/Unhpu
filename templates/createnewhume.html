@@ -65,7 +65,7 @@
                            <td>
                               <select name="size" id="size1">
                                  {% for i in humePipeSize %}
-                                    <option value="size">{{i}}</option>
+                                    <option value="{{i}}">{{i}}</option>
                                 {% endfor %}
                               </select>
                            </td>
@@ -92,6 +92,22 @@
         				<td class="std">
 							<input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal">
 						</td>
+               </tr>
+               <tr>
+                  <td class="totaltext" align="right">
+                     <b class="vattext">13% VAT:</b>
+                  </td>
+                  <td class="std">
+                     <input type="number" class="form-control input-sm" id="vat">
+                  </td>
+               </tr>
+               <tr>
+                  <td class="totaltext" align="right">
+                     <b class="finaltotaltext">Total</b>
+                  </td>
+                  <td class="std">
+                     <input type="number" name="gtotal" class="form-control input-sm" id="gtotal">
+                  </td>
                </tr>
                
                <tr>
@@ -168,9 +184,9 @@
          
                  html_code += '<td><select name="type" id="type ' + count + '"><option value="NP3">NP3</option><option value="NP2">NP2</option></select></td>';
                  html_code += '<td><select name="size" id="size' + count + '"';
-                 {% for i in humePipeSize %}
-                  html_code += '<option value="size">{{i}}</option>';
-                 {% endfor %}
+                 //{% for i in humePipeSize %} 
+                 html_code += '<option value="size">{{i}}</option>';
+                 //{% endfor %}
                  html_code += '<td><select name="unit" id="unit ' + count + '"><option value="Piece">Piece</option><option value="Running Meter">Running Meter</option></select>';
                  html_code += '<td><input type="number" name="quantity" placeholder="Enter Quantity" id="quantity' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
                  html_code += '<td><input type="number" placeholder="Enter Price" name="price" id="price' + count + '" data-srno="' + count + '" class="form-control input-sm order_item_actual_amount"  /></td>';
@@ -199,7 +215,8 @@
 					$('#amount'+j).val(pricev);
 				}
 				$('#finaltotal').val(final_total)
-						
+            $('#vat').val((final_total * 13) / 100);
+				$('#gtotal').val(((final_total * 13) / 100) + final_total);	
 				});
         	$('#create_invoice').click(function(){
           if($.trim($('#order_receiver_name').val()).length == 0)

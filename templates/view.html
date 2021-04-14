@@ -1,95 +1,126 @@
 {% extends 'base.html' %}
 {% block body %}
-<link href="{{ url_for('static', filename='css/nepali.datepicker.v3.min.css') }}" rel="stylesheet" type="text/css"/>
 
 <style>
-       	
-.std{
-	width: 200px;
-}
-.finaltotaltext{
-	float: right;
-}
+   .std {
+      width: 200px;
+   }
+   html { overflow-y: hidden; }
+
+   
+   
 </style>
-<div>
-         <div class="table-responsive">
-            <table class="table table-bordered">
-               <tr>
-                  <td colspan="2" align="center">
-                     <h2 style="margin-top:10.5px">View Data</h2>
-                  </td>
-               </tr>
-               <tr>
-                  <td colspan="2">
-                     <div class="row">
-                        <div class="col-md-8">
-                           To,<br />
-                  <b>RECEIVER (BILL TO)</b><br />
-                  <input type="text" name="order_receiver_name" id="order_receiver_name" class="form-control input-sm" placeholder="Enter Receiver Name" value="{{maindata.name}}" readonly/>
-                  <input type="number" placeholder="Enter Reciever PAN" id="pan" name="pan" class="form-control input-sm" value="{{maindata.pan}}" readonly>
-                  <textarea name="address" id="order_receiver_address" class="form-control" placeholder="Enter Billing Address" readonly>{{maindata.address}}</textarea>
+<button class="btn btn-primary float-right mt-3 mr-2 print">Print</button>
+<button class="btn btn-primary float-left mt-3 mr-2" id="{{maindata.chanum}}" onclick="edit(this)">Edit</button>
+<div id="printdiv">
+   <div class="table-responsive" style="overflow: hidden;">
+      <table class="table table-bordered">
+         <tr>
+            <td colspan="2" align="center">
+               <h3 style="margin-top:10.5px">Unique Nepal Hume Pipe Udhyog</h2>
+                  <h5>Bharatpur-14, Chitwan</h2>
+            </td>
+         </tr>
+         <tr>
+            <td colspan="6">
+               <div class="row">
+                  <div class="col-md-8">
+                     To,<br />
+                     <b>RECEIVER (BILL TO)</b><br />
+                     <b>Name: {{maindata.name}}</b></br>
+                     <b>PAN: {{maindata.pan}}</b></br>
+                     <b>Address: {{maindata.address}}</b>
+                  </div>
+                  <div class="col-md-4">
+                     <div style="margin-left: 8em;" >
+                     More Details<br />
+                     <b>Bill No: {{maindata.billnum}}</b></br>
+                     <b>Challan No: {{maindata.chanum}}</b></br>
+                     <b>Date: {{maindata.date}}</b></br>
+                     <b>Phone No: {{maindata.phone}}</b>
+                  </div>
+                  </div>
                </div>
-               <div class="col-md-4">
-                  More Details<br />
-                  <input type="text" name="billnum" id="billnum" value="{{maindata.billnum}}" class="form-control input-sm" placeholder="Enter Bill No." readonly/>
-                  <input type="number" name="chanum" id="chanum" class="form-control input-sm" placeholder="Enter Challan No." value="{{maindata.chanum}}" readonly/>
-                  <input type="text" name="date" id="date" class="form-control" placeholder="Select Date" readonly value="{{maindata.date}}"/>
-                  <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter Reciever Phone Number" value="{{maindata.phone}}" readonly/>
-               </div>
-                        </div>
-                     </div>
-                     <br />
-                     <table id="invoice-item-table" class="table table-bordered">
-                        <tr>
-                           <th>Sr No.</th>
-                           <th>Type</th>
-                           <th>Size</th>
-                           <th>Unit</th>
-                           <th>Quantity</th>
-                           <th>Price</th>
-                           <th>Amount</th>
-                        </tr>
-                        <tr>
-                          
-                           {% for values in ext %}
-                           	
-                           	<td>{{loop.index}}</td>
-                           		
-                            <td>
-                              <select name="type" id="type{{loop.index}}" disabled="disabled">
-                                  
-                                 <option value="NP3"{% if values.type=="NP3" %} selected="selected"{% endif %}>NP3</option>
-                                 
-                                 <option value="NP2"{% if values.type=="NP2" %} selected="selected"{% endif %}>NP2</option>
-                              </select>
-                           </td>
-                           <td><input placeholder="Enter Size" type="text" name="size" class="form-control input-sm" value="{{values.size}}" id="size{{loop.index}}" readonly></td>
-                           <td>
-                          
-                              <select name="unit" id="unit{{loop.index}}" disabled="disabled">
-                                 <option value="Piece"{% if values.unit=="Piece" %} selected="selected" {% endif %}>Piece</option>
-                                 <option value="Running Meter"{% if values.unit=="Running Meter" %} selected="selected"  {% endif %}>Running Meter</option>
-                              </select>
-                           </td>
-                           <td><input type="number" class="form-control input-sm" name="quantity" placeholder="Enter Quantity" value="{{values.quantity}}" id="quantity{{loop.index}}" readonly/></td>
-                           <td><input type="number" name="price" id="price{{loop.index}}" value="{{values.price}}" placeholder="Enter Price" class="form-control input-sm order_item_actual_amount" readonly></td>
-                           <td><input type="number" name="amount" id="amount{{loop.index}}" placeholder="Amount" class="form-control input-sm order_item_actual_amount" value="{{values.amount}}" readonly></td>
-                        </tr>
-                        {% endfor %}
-                     </table>
-                     
-                  </td>
-               </tr>
-               <tr>
-                  <td class="finaltotaltd">
-						<b class="finaltotaltext">Total</b>
-						</td>
-        				<td class="std">
-							<input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal" value="{{maindata.total}}" readonly>
-						</td>
-               </tr>
-            </table>
-         </div>
-      </div>
+   </div>
+   <br />
+   <table id="invoice-item-table" class="table table-bordered">
+      <tr>
+         <th>Sr No.</th>
+         <th>Type</th>
+         <th>Size</th>
+         <th>Unit</th>
+         <th>Quantity</th>
+         <th>Price</th>
+         <th>Amount</th>
+      </tr>
+      <tr>
+
+         {% for values in ext %}
+
+         <td>{{loop.index}}</td>
+
+         <td>
+            {{values.type}}
+         </td>
+         <td>{{values.size}}</td>
+         <td>
+
+            {{values.unit}}
+         </td>
+         <td>{{values.quantity}}</td>
+         <td>{{values.price}}</td>
+         <td>{{values.amount}}</td>
+      </tr>
+      {% endfor %}
+   </table>
+
+   </td>
+   </tr>
+   </table>
+
+   <table class="tbl table-bordered" style="margin-left: auto; border-collapse:separate; border-spacing:1em;">
+      <tr>
+         <td class="totaltext" align="right">
+            <b class="finaltotaltext">Sub Total:</b>
+         </td>
+         <td class="std">
+            {{maindata.total}}
+         </td>
+      </tr>
+      <tr>
+         <td class="totaltext" align="right">
+            <b class="vattext">13% VAT:</b>
+         </td>
+         <td class="std">
+            {{(maindata.total * 13) / 100}}
+         </td>
+      </tr>
+      <tr>
+         <td class="totaltext" align="right">
+            <b class="finaltotaltext">Total</b>
+         </td>
+         <td class="std">
+            {{((maindata.total * 13) / 100) + maindata.total}}
+         </td>
+      </tr>
+   </table>
+
+</div>
+</div>
 {% endblock body %}
 
+{% block script %}
+<script>
+   $(document).on('click', '.print', function () {
+      var restorepage = document.documentElement.innerHTML;
+      var printcontent = document.getElementById('printdiv').innerHTML;
+      document.body.innerHTML = '<style>.tbl{margin-right: 8em;} html{overflow: hidden;}</style>' + printcontent;
+      window.print();
+      location.reload();
+
+   });
+   function edit(t){
+      window.location.href = '/edit/' + t.id;
+   }
+</script>
+{% endblock script %}
