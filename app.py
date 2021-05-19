@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, send_file, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-import xlsxwriter
 from io import BytesIO
 
 
@@ -61,10 +60,7 @@ def sesscheck():
 	else:
 		return False
 	
-def gettodaydate():
-	from nepali_date import NepaliDate
-	a = str(NepaliDate.today())
-	return a[3:7], a[8:10], a[11:13]
+
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -197,7 +193,7 @@ def delete(chnum):
 		return redirect("/")
 	else: 
 		flash('Bill Doesnot Exist','error')
-		return redirect(url_for('humepipelist'))
+		return redirect('/')
 		
 @app.route("/client_delete/<string:chnum>")
 def client_delete(chnum):
@@ -215,7 +211,7 @@ def client_delete(chnum):
 		return redirect("/clients")
 	else: 
 		flash('Bill Doesnot Exist','error')
-		return redirect(url_for('humepipelist'))
+		return redirect('/')
 		
 		
 @app.route("/view/<string:chnum>")
