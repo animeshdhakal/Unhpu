@@ -87,7 +87,7 @@
                </tr>
                <tr>
                   <td class="finaltotaltd">
-							<button type="button" id="calculate" class="btn btn-success">Calculate</button><b class="finaltotaltext">Total</b>
+							<b class="finaltotaltext">Total</b>
 						</td>
         				<td class="std">
 							<input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal">
@@ -137,14 +137,14 @@
       <script>
          $(document).ready(function () {
          	var a=[];
- 			function loadCountries(){
+ 			function loadClients(){
   				$.getJSON('/client', function(data, status, xhr){
    					for (var i = 0; i < data.length; i++ ) {
     					a.push(data[i].name);
    					}
  				});
  			};
- 			loadCountries();
+ 			loadClients();
 				
 			
 
@@ -204,7 +204,7 @@
                  count--;
                  $('#total_item').val(count);
              });
-             $(document).on('click', '#calculate', function () {
+             $(document).on('propertychange input', '.form-control', function () {
 				var final_total = 0;
 				for(j=1; j<=count; j++)
 				{

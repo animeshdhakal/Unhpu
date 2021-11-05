@@ -101,8 +101,7 @@
    </tr>
    <tr>
       <td class="finaltotaltd">
-         <button type="button" id="calculate" class="btn btn-success">Calculate</button><b
-            class="finaltotaltext">Total</b>
+         <b class="finaltotaltext">Total</b>
       </td>
       <td class="std">
          <input type="number" id="finaltotal" class="form-control input-sm" name="finaltotal"
@@ -153,7 +152,7 @@
 <script>
    var count = '{{ length }}';
 
-   $(document).on('click', '#calculate', function () {
+   $(document).on('propertychange input', '.form-control', function () {
       var final_total = 0;
       for (j = 1; j <= count; j++) {
          quantity = $('#quantity' + j).val();
