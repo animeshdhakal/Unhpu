@@ -159,12 +159,11 @@
          price = $('#price' + j).val();
          pricev = parseFloat(price) * parseFloat(quantity);
          final_total = parseFloat(final_total) + parseFloat(pricev)
-         $('#amount' + j).val(pricev);
+         $('#amount' + j).val(pricev.toFixed(2));
       }
-      $('#finaltotal').val(final_total);
-      console.log(final_total)
-      $('#vat').val((final_total * 13) / 100);
-		$('#gtotal').val(((final_total * 13) / 100) + final_total);	
+      $('#finaltotal').val(final_total.toFixed(2));
+      $('#vat').val(((final_total * 13) / 100).toFixed(2));
+		$('#gtotal').val((((final_total * 13) / 100) + final_total).toFixed(2));	
 
    });
    $('#create_invoice').click(function () {
