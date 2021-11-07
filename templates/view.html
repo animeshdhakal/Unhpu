@@ -83,7 +83,7 @@
             <b class="finaltotaltext">Sub Total:</b>
          </td>
          <td class="std">
-            {{maindata.total}}
+            {{round(maindata.total, 2)}}
          </td>
       </tr>
       <tr>
@@ -91,7 +91,7 @@
             <b class="vattext">13% VAT:</b>
          </td>
          <td class="std">
-            {{(maindata.total * 13) / 100}}
+            {{round((maindata.total * 13) / 100, 2)}}
          </td>
       </tr>
       <tr>
@@ -99,7 +99,7 @@
             <b class="finaltotaltext">Total</b>
          </td>
          <td class="std">
-            {{((maindata.total * 13) / 100) + maindata.total}}
+            {{round((((maindata.total * 13) / 100) + maindata.total), 2)}}
          </td>
       </tr>
    </table>

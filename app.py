@@ -221,7 +221,7 @@ def view(chnum):
 	maindata = Info.query.filter_by(chanum=chnum).first()
 	ext = Extra.query.filter_by(chanum=chnum).all()
 	length = len(ext)
-	return render_template("view.html", ext=ext, maindata=maindata, length=length)
+	return render_template("view.html", ext=ext, maindata=maindata, length=length, round=round)
 	
 @app.route("/edit/<string:chanum>", methods=["POST", "GET"])
 def edit(chanum):
